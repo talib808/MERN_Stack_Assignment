@@ -1,5 +1,5 @@
 ### E-Commerce Web Application
-> • Live Recording - - [Assignment]()
+> • Live Recording - - [Assignment](https://drive.google.com/file/d/1WG35yySd0abiyfsx5KFZlvsFHiQVH_4X/view?usp=sharing)
 - This is an E-Commerce web application built using MERN (MongoDB, Express, React, Node.js) stack. It allows users to register, log in, manage products, and add products to their cart. The application has separate functionalities for both store owners and customers.
 
 ### Features
