@@ -7,13 +7,10 @@ const storeRoutes = require("./routes/storeRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 
-// Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
-});
+// Connect to MongoDB
+dbConnection.connectToDatabase();
+
 app.use(express.json());
-app.use(express.static("public"));
 const cors = require("cors");
 app.use(cors());
 
@@ -23,7 +20,12 @@ app.use("/stores", storeRoutes);
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
 
-// Start the server
+// Close database connection on shutdown
+process.on("SIGINT", async () => {
+  await dbConnection.closeDatabaseConnection();
+  process.exit();
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
