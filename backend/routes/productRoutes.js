@@ -1,11 +1,11 @@
 const express = require("express");
 const Product = require("../models/Product");
-const authMiddleware = require("../middlewares/auth");
+const authenticateUser = require("../middlewares/auth");
 
 const router = express.Router();
 
 // Add Product
-router.post("/add-product", authMiddleware, async (req, res) => {
+router.post("/add-product", authenticateUser, async (req, res) => {
   try {
     const { name, image, description, price, quantity } = req.body;
 
@@ -22,12 +22,13 @@ router.post("/add-product", authMiddleware, async (req, res) => {
 
     res.status(201).send(newProduct);
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error adding product:", error);
+    res.status(400).send({ error: "An error occurred while adding the product." });
   }
 });
 
 // Update Product
-router.patch("/update-product/:id", authMiddleware, async (req, res) => {
+router.patch("/update-product/:id", authenticateUser, async (req, res) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = [
@@ -57,12 +58,13 @@ router.patch("/update-product/:id", authMiddleware, async (req, res) => {
 
     res.send(product);
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error updating product:", error);
+    res.status(400).send({ error: "An error occurred while updating the product." });
   }
 });
 
 // Delete Product
-router.delete("/delete-product/:id", authMiddleware, async (req, res) => {
+router.delete("/delete-product/:id", authenticateUser, async (req, res) => {
   try {
     const product = await Product.findOneAndDelete({
       _id: req.params.id,
@@ -75,18 +77,21 @@ router.delete("/delete-product/:id", authMiddleware, async (req, res) => {
 
     res.send(product);
   } catch (error) {
-    res.status(500).send(error);
+    console.error("Error deleting product:", error);
+    res.status(500).send({ error: "An error occurred while deleting the product." });
   }
 });
 
 // Get Products List
-router.get("/products", authMiddleware, async (req, res) => {
+router.get("/products", authenticateUser, async (req, res) => {
   try {
     const products = await Product.find({ store: req.user._id });
     res.send(products);
   } catch (error) {
-    res.status(500).send(error);
+    console.error("Error fetching products:", error);
+    res.status(500).send({ error: "An error occurred while fetching products." });
   }
 });
 
 module.exports = router;
+
