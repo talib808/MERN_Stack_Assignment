@@ -1,8 +1,8 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const User = require("../models/user");
-const authMiddleware = require("../middlewares/auth");
+const User = require("../models/User");
+const authenticateUser = require("../middlewares/auth");
 const { jwtSecretKey } = require("../config/keys");
 
 const router = express.Router();
@@ -11,6 +11,11 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, phone, country } = req.body;
+
+    // Validate input data
+    if (!name || !email || !password || !phone || !country) {
+      return res.status(400).send({ error: "All fields are required." });
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -33,7 +38,8 @@ router.post("/register", async (req, res) => {
       .status(201)
       .send({ message: "Registration successful.", user: newUser });
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Registration error:", error);
+    res.status(500).send({ error: "Internal server error." });
   }
 });
 
@@ -42,32 +48,29 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // console.log("Received login request for email:", email);
+    // Validate input data
+    if (!email || !password) {
+      return res
+        .status(400)
+        .send({ error: "Email and password are required." });
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).send({ error: "Invalid email." });
+      return res.status(401).send({ error: "Invalid email or password." });
     }
-
-    // console.log("User found:", user);
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).send({ error: "Incorrect password." });
+      return res.status(401).send({ error: "Invalid email or password." });
     }
 
-    // console.log("Password is valid.");
-
     const token = jwt.sign({ _id: user._id }, jwtSecretKey);
-
-    // console.log("Before concat: user.tokens =", user.tokens);
 
     user.tokens = user.tokens.concat({ token });
     await user.save();
 
-    // console.log("After concat: user.tokens =", user.tokens);
-
-    res.send({ user, token });
+    res.send({ message: "Login successful.", user, token });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).send({ error: "Internal server error." });
