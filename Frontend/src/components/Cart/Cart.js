@@ -6,8 +6,12 @@ const Cart = () => {
 
   const fetchCartItems = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/cart/cart'); 
-      setCartItems(response.data);
+      const response = await axios.get('http://localhost:5000/cart/cart', {
+        headers: {
+          Authorization: `Bearer jwtSecretKey`, 
+        },
+      });
+      setCartItems(response.data.items);
     } catch (error) {
       console.error('Error fetching cart items:', error);
     }
@@ -19,7 +23,11 @@ const Cart = () => {
 
   const handleRemoveFromCart = async (productId) => {
     try {
-      await axios.delete(`http://localhost:5000/cart/remove-from-cart/${productId}`); 
+      await axios.delete(`http://localhost:5000/cart/remove-from-cart/${productId}`, {
+        headers: {
+          Authorization: `Bearer jwtSecretKey`, 
+        },
+      });
       fetchCartItems();
     } catch (error) {
       console.error('Error removing product from cart:', error);
@@ -50,4 +58,5 @@ const Cart = () => {
 };
 
 export default Cart;
+
 
